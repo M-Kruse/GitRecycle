@@ -5,4 +5,5 @@ from Recycler.models import Repo
 class RepoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Repo
-        fields = ['url', 'node']
+        #UUID is server generated, the other 3 are github repo fields that the workers need to send us.
+        fields = ['uuid', 'url', 'node', 'create_date']
