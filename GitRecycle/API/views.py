@@ -1,9 +1,10 @@
 from django.contrib.auth.models import User, Group
 from rest_framework import viewsets
 from rest_framework import permissions
-from .serializers import RepoSerializer
-from Recycler.models import Repo
-from rest_framework.decorators import api_view
+
+from .serializers import RepoSerializer, QuerySerializer
+
+from Recycler.models import Repo, Query
 
 class RepoViewSet(viewsets.ModelViewSet):
     queryset = Repo.objects.all()
@@ -21,3 +22,7 @@ class StaleRepoViewSet(viewsets.ReadOnlyModelViewSet):
 class FreshRepoViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Repo.objects.filter(stale=False)
     serializer_class = RepoSerializer
+
+class QueryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Query.objects.all()
+    serializer_class = QuerySerializer
