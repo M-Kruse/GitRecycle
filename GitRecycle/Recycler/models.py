@@ -12,9 +12,10 @@ class Query(models.Model):
 class Repo(models.Model):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True) #Node ID might be unique enough to be used as a unique id
     query = models.ForeignKey('Query', on_delete=models.SET_NULL, null=True)
-    url =  models.CharField(max_length=254) # 'html_url': 'https://github.com/daniel-e/tetros',
-    node = models.CharField(max_length=254) # 'node_id': 'MDEwOlJlcG9zaXRvcnk2ODkxMTY4Mw==',GraphQL node_id - can try integrating GraphQL
-    create_date = models.DateTimeField(editable=False, null=True) #  '2016-09-22T10:42:55Z', When the repo was created
+    description = models.CharField(max_length=512, null=True)
+    url =  models.CharField(max_length=256) # 'html_url': 'https://github.com/daniel-e/tetros',
+    node = models.CharField(max_length=256) # 'node_id': 'MDEwOlJlcG9zaXRvcnk2ODkxMTY4Mw==',GraphQL node_id - can try integrating GraphQL
+    create_date = models.CharField(max_length=128, null=True) #  '2016-09-22T10:42:55Z', When the repo was created
     scrape_date = models.DateTimeField(default=datetime.now) #  When we scraped the repo
     last_checked = models.DateTimeField(null=True) # '2016-09-22T10:42:55Z',
     stale = models.BooleanField(default=False) #Set this to true after a time limit so it won't be checked anymore, then remove the archive

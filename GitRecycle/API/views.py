@@ -9,7 +9,7 @@ from Recycler.models import Repo, Query
 class RepoViewSet(viewsets.ModelViewSet):
     queryset = Repo.objects.all()
     serializer_class = RepoSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    #permission_classes = [permissions.IsAuthenticated]
 
 class ArchivedRepoViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Repo.objects.filter(archived=True)
