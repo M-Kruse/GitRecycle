@@ -8,6 +8,7 @@ repo_router.register(r'fresh', views.FreshRepoViewSet)
 repo_router.register(r'', views.RepoViewSet)
 
 query_router = routers.DefaultRouter()
+query_router.register(r'worker', views.RoundRobinQueryViewSet)
 query_router.register(r'', views.QueryViewSet)
 
 

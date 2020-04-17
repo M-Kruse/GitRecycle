@@ -11,4 +11,4 @@ class RepoSerializer(serializers.HyperlinkedModelSerializer):
 class QuerySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Query
-        fields = ['string']
+        fields = ['string', 'language']
