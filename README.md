@@ -32,21 +32,21 @@ I accidentally set a private repo to public in the past and know others that hav
 
 # Endpoints
 
-Main endpoints are /repo/ and /query/ with /query/worker serving the workers with queries
-
-![image](https://user-images.githubusercontent.com/46699116/79528416-c292db80-801e-11ea-907a-e8c6a6d7640f.png)
-
-![image](https://user-images.githubusercontent.com/46699116/79528450-d50d1500-801e-11ea-85f4-4cc033a37e40.png)
+Main endpoints are /api/repo/ and /api/query/ with /api/query/worker serving the workers with queries
 
 ## Repo
 
-*  /repo/
-*  /repo/fresh/
-*  /repo/stale/
-*  /repo/archived/
+*  /api/repo/
+*  /api/repo/fresh/
+*  /api/repo/stale/
+*  /api/repo/archived/
 
 ## Query
 
-*  /query/
-*  /query/worker/
+*  /api/query/
+*  /api/query/worker/
 
+
+# Worker
+
+The current worker is using celery and at https://github.com/M-Kruse/GitRecycle-Worker
