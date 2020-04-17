@@ -39,11 +39,11 @@ class CycleQueryViewSet(viewsets.ReadOnlyModelViewSet):
     #This is my little hack to make it cycle through the queries, don't judge me
     def list(self, request):    
         query_count = Query.objects.count()
-        if conf_settings.RR_INDEX < query_count - 1:
-            conf_settings.RR_INDEX += 1
+        if conf_settings.RRQ_INDEX < query_count - 1:
+            conf_settings.RRQ_INDEX += 1
         else:
-            conf_settings.RR_INDEX = 0
-        queryset = Query.objects.all()[conf_settings.RR_INDEX]
+            conf_settings.RRQ_INDEX = 0
+        queryset = Query.objects.all()[conf_settings.RRQ_INDEX]
         serializer = QuerySerializer(queryset)
         return Response(serializer.data)
 
