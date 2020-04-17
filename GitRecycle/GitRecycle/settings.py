@@ -123,4 +123,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 #hack for doing a round robin loop through model elements
-RR_INDEX = 0
+RRQ_INDEX = 0
+RRF_INDEX = 0

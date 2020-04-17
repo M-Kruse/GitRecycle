@@ -32,7 +32,7 @@ I accidentally set a private repo to public in the past and know others that hav
 
 # Endpoints
 
-Main endpoints are /api/repo/ and /api/query/ with /api/query/worker serving the workers with queries
+Main endpoints are /api/repo/ and /api/query/ with /api/query/worker and /api/repo/worker serving the workers
 
 ## Repo
 
@@ -40,12 +40,12 @@ Main endpoints are /api/repo/ and /api/query/ with /api/query/worker serving the
 *  /api/repo/fresh/
 *  /api/repo/stale/
 *  /api/repo/archived/
+*  /api/repo/worker/
 
 ## Query
 
 *  /api/query/
 *  /api/query/worker/
-
 
 # Worker
 

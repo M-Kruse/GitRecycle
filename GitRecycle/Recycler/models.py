@@ -3,10 +3,18 @@ from django.db import models
 from datetime import datetime
 import uuid
 
+from django.core.validators import MaxValueValidator, MinValueValidator
+
 class Query(models.Model):
     string = models.CharField(max_length=64) #The search query used to find the repos
     language = models.CharField(max_length=64, default="python") #The language you want to search for
-
+    time_limit_seconds = models.IntegerField( #Time limit before we consider the repo to be stale and not interesting anymore
+                                    default=120, #This should probably be tiered so that projects deleted quickly have higher alert level
+                                    validators=[
+                                        MaxValueValidator(86400), #24 hour max
+                                        MinValueValidator(10)
+                                        ]
+                                )
     def __str__(self):
         return self.string
 
