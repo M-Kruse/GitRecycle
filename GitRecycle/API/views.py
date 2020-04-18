@@ -5,9 +5,9 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import UpdateModelMixin
 
-from .serializers import RepoSerializer, QuerySerializer
+from .serializers import RepoSerializer, QuerySerializer, MissingRepoSerializer
 
-from Recycler.models import Repo, Query
+from Recycler.models import Repo, Query, MissingRepo
 
 from django.conf import settings as conf_settings
 
@@ -61,3 +61,7 @@ class CycleFreshRepoViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = RepoSerializer(queryset)
         return Response(serializer.data)
     
+class MissingRepoViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MissingRepo.objects.filter()
+    serializer_class = MissingRepoSerializer
+

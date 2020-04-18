@@ -125,3 +125,8 @@ STATIC_URL = '/static/'
 #hack for doing a round robin loop through model elements
 RRQ_INDEX = 0
 RRF_INDEX = 0
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
+}
