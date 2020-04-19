@@ -5,7 +5,7 @@ from Recycler.models import Repo, Query, MissingRepo
 class RepoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Repo
-        fields = ['uuid', 'url', 'node', 'create_date', 'description', 'stale']
+        fields = ['uuid', 'url', 'node', 'create_date', 'description', 'stale', 'last_checked']
 
     def get_serializer(self, *args, **kwargs):
         kwargs['partial'] = True

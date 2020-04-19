@@ -10,6 +10,7 @@ from .serializers import RepoSerializer, QuerySerializer, MissingRepoSerializer
 from Recycler.models import Repo, Query, MissingRepo
 
 from django.conf import settings as conf_settings
+from datetime import datetime, timedelta
 
 class RepoViewSet(viewsets.ModelViewSet):
     queryset = Repo.objects.all()
@@ -46,7 +47,8 @@ class CycleQueryViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = Query.objects.all()[conf_settings.RRQ_INDEX]
         serializer = QuerySerializer(queryset)
         return Response(serializer.data)
-
+from django.utils import timezone
+import pytz
 class CycleFreshRepoViewSet(viewsets.ReadOnlyModelViewSet):
     conf_settings.RRR_INDEX = 0
     queryset = Repo.objects.filter(stale=False)
@@ -57,7 +59,19 @@ class CycleFreshRepoViewSet(viewsets.ReadOnlyModelViewSet):
             conf_settings.RRR_INDEX += 1
         else:
             conf_settings.RRR_INDEX = 0
-        queryset = Repo.objects.all()[conf_settings.RRR_INDEX]
+        now = datetime.now()
+        print(now.strftime('%Y-%m-%dT%H:%M:%S%z'))
+        time_threshold = now - timedelta(seconds=30)
+        #print(time_threshold.strftime('%Y-%m-%dT%H:%M:%S%z'))
+        queryset = Repo.objects.filter(stale=False, last_checked__lt=time_threshold)[conf_settings.RRR_INDEX]
+        # if len(queryset) == 0:
+        #     return Response()
+        # else:
+        #     if len(queryset) > 1:
+        #         queryset = queryset[conf_settings.RRR_INDEX]
+        #     print(queryset)
+        #     print(len(queryset))
+        print(queryset)
         serializer = RepoSerializer(queryset)
         return Response(serializer.data)
     
@@ -65,3 +79,7 @@ class MissingRepoViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = MissingRepo.objects.filter()
     serializer_class = MissingRepoSerializer
 
+class RepoNodeQueryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = MissingRepo.objects.all()
+    serializer_class = MissingRepoSerializer
+    lookup_field = 'nodeID'
