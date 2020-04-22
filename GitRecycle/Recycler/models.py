@@ -48,19 +48,6 @@ class Repo(models.Model):
     def __str__(self):
         return self.url
 
-#Class Archive(models.Model)
-    #date_archived 
-    #location
-    #stale
-
-@receiver(post_save, sender=Repo)
-def repo_post_save(sender, instance, signal, *args, **kwargs):
-    print("Praise the lawd, we clonin!")
-    # Do some error handling here 
-    r = clone_repo.delay(instance.pk)
-    print(r.task_id)
-    return r
-
 class MissingRepo(models.Model):
     #origin_repo = models.UUIDField(null=True) #Node ID might be unique enough to be used as a unique id
     origin_repo = models.ForeignKey('Repo', on_delete=models.SET_NULL, null=True) #I'm not sure if this is really necessary
@@ -71,3 +58,23 @@ class MissingRepo(models.Model):
 
     def __str__(self):
         return str(self.origin_repo)
+
+@receiver(post_save, sender=Repo)
+def repo_post_save(sender, instance, signal, *args, **kwargs):
+    # Do some error handling here 
+    r = clone_repo.delay(instance.pk)
+    print(r.task_id)
+    return r
+
+#class AnalyticsReport(models.Model):
+    #storage_used
+    #storage_max
+    #missing_repos
+    #fresh_repos
+    #stale_repos
+    #total_repos_alltime
+
+#Class Archive(models.Model)
+    #date_archived 
+    #location
+    #stale
