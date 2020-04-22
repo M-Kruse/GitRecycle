@@ -1,16 +1,16 @@
 # GitRecycle
 
-This is a project to test the idea of creating a recycle bin for public github projects in order to find projects that are either deleted or went from public to private in a short timeframe, such as in the case of an accident.
+This is a project to test the idea of creating a recycle bin for public github repos in order to find ones that are either deleted or went from public to private in a short timeframe, such as in the case of an accident or forced removal. This is the original idea, it may flux a bit.
 
 # How it works
 
-Keywords are added and github is searched at interval for new repos. Those repos are archived.
+Keywords are added and workers search Github at interval for new repos. Those repos are archived.
 
-A time limit is set. If the repo is deleted within that time, an alert is generated to review it.
+A time limit is set. If the repo goes missing within that time, an alert is generated to review it.
 
 The alerted repo can be dismissed or saved. If dismissed, the archived copy of the repo is deleted.
 
-If the time limit expires, the repo is considered to be stale and is deleted from storage.
+If the time limit expires, and the repo has not gone missing, the repo is considered to be stale and is deleted from storage.
 
 # Add some example query data
 
@@ -28,25 +28,32 @@ Out[15]: <QuerySet [<Query: cve>, <Query: malware>, <Query: exploit>, <Query: ha
 
 # Why?
 
-I accidentally set a private repo to public in the past and know others that have too. This also happens when Github chooses or is forced to take down a repo. I recently thought what you might find with certain keywords if you started scraping new repos and saving/alerting to ones that vanish within a (short) period of time, for whatever reason either deleted, set to private or removed by Github.
+I accidentally set a private repo to public in the past and know others that have too. This also happens when Github chooses or is forced to take down a repo. I recently thought what you might find with certain keywords if you started scraping new repos and saving/alerting to ones that vanish within a (short) period of time.
 
 # Endpoints
 
-Main endpoints are /api/repo/ and /api/query/ with /api/query/worker and /api/repo/worker serving the workers
+Main endpoints are /api/repo/ and /api/query/
 
 ## Repo
 
-*  /api/repo/
-*  /api/repo/fresh/
-*  /api/repo/stale/
-*  /api/repo/archived/
-*  /api/repo/worker/
+*  /api/repo/ - Lists all repos
+*  /api/repo/fresh/ - Lists repos that are still fresh and being checked
+*  /api/repo/stale/ - Lists repos that have gone stale
+*  /api/repo/archived/ - Lists repos that have been archived
 
 ## Query
 
-*  /api/query/
-*  /api/query/worker/
+*  /api/query/ - Lists the current strings to use as search queries
 
 # Worker
 
-The current worker is using celery and at https://github.com/M-Kruse/GitRecycle-Worker
+Currently the Repo model has a hook in the post save function to send newly saved github URLs to a celery worker queue which uses GitRecycle/tasks.py
+
+## How to start worker
+
+From the root project directory, run
+
+`celery -A GitRecycle worker -l info`
+
+Then you can POST repo info to the API or use the admin console to manually add and test
+

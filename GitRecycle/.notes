@@ -1,0 +1,11 @@
+export PATH=$PATH:/home/devel/.local/bin/celery
+
+~/.local/bin/celery -A tasks purge
+~/.local/bin/celery -A tasks worker --loglevel=info
+
+celery -A tasks beat -l DEBUG
+
+docker container start bold_hopper
+
+sudo mount.nfs 192.168.1.254:/ZSTOR/Personal/ /mnt/
+

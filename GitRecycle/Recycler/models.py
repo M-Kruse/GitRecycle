@@ -5,6 +5,12 @@ import uuid
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+from django.db.models import signals
+from .tasks import clone_repo
+ 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 class Query(models.Model):
     string = models.CharField(max_length=64) #The search query used to find the repos
     language = models.CharField(max_length=64, blank=True, null=True) #The language you want to search for
@@ -28,12 +34,21 @@ class Repo(models.Model):
     scrape_date = models.DateTimeField(default=datetime.now) #  When we scraped the repo
     last_checked = models.DateTimeField(null=True) # '2016-09-22T10:42:55Z',
     stale = models.BooleanField(default=False) #Set this to true after a time limit so it won't be checked anymore, then remove the archive
-    archived = models.BooleanField(default=True) #By default we save the repo before creating new Repo object so it will be True until it is removed from storage
-    stale_date = models.DateTimeField(null=True)
+    archived = models.BooleanField(default=False) #We don't set this to true till the worker has cloned the repo and reported it as cloned
+    stale_date = models.DateTimeField(blank=True, null=True)
     archive_loc = models.CharField(max_length=512, default="")
+    missing = models.BooleanField(default=False)
 
     def __str__(self):
         return self.url
+    
+@receiver(post_save, sender=Repo)
+def repo_post_save(sender, instance, signal, *args, **kwargs):
+    print("Praise the lawd, we clonin!")
+    # Do some error handling here 
+    r = clone_repo.delay(instance.pk)
+    print(r.task_id)
+    return r
 
 class MissingRepo(models.Model):
     #origin_repo = models.UUIDField(null=True) #Node ID might be unique enough to be used as a unique id
