@@ -2,8 +2,6 @@
 
 # GitRecycle
 
-![image](https://user-images.githubusercontent.com/46699116/79948981-a8476c00-8429-11ea-94a0-8f95f1606902.png)
-
 This is a project to test the idea of creating a recycle bin for public github repos in order to find ones that are either deleted or went from public to private in a short timeframe, such as in the case of an accident or forced removal. This is the original idea, it may flux a bit.
 
 # How it works
