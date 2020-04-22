@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 
 from git import Git, Repo
 from git.exc import InvalidGitRepositoryError
@@ -20,18 +21,19 @@ github_search_url = "https://api.github.com/search/repositories"
 
 @shared_task()
 def clone_repo(repo_pk):
-        repo = models.Repo.objects.get(pk=repo_pk)
-        if repo.archived == False:
-            print("Cloning {0}".format(repo))
-            Git(archive_path).clone(repo.url.replace("https://","git://"))
-            #Add option for different backend like S3
-            #Add some error handling
-            payload = {'archived':True}
-            r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo.node), data=payload)
-            #Add error handling
-            print(r.status_code)
-        else:
-            print("[INFO] Repo already cloned, skipping...")
+    try:
+        repo = models.Repo.objects.get(pk=repo_pk, archived=False)
+    except models.Repo.DoesNotExist:
+        repo = None
+    if repo:
+        print("Cloning {0}".format(repo))
+        Git(archive_path).clone(repo.url.replace("https://","git://"))
+        #Add option for different backend like S3
+        #Add some error handling
+        payload = {'archived':True}
+        r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo.node), data=payload)
+        #Add error handling
+        print(r.status_code)
 
 @periodic_task(run_every=(crontab(hour="*", minute="*")), name="search_repos_every_minute", ignore_result=True)
 def github_repo_search():
@@ -75,18 +77,18 @@ def github_repo_search():
 
 
 
-@periodic_task(run_every=1, name="test_if_repo_public_every_second", ignore_result=True)
+@periodic_task(run_every=3, name="test_if_repo_public_every_second", ignore_result=True)
 def is_repo_public():
     """
     Test if the repo still is public or inaccessible, report back to the server the result
     """
     now = datetime.now()
     print(now.strftime('%Y-%m-%dT%H:%M:%S%z'))
-    time_threshold = now - timedelta(seconds=5)
+    time_threshold = now - timedelta(seconds=60)
     #print(time_threshold.strftime('%Y-%m-%dT%H:%M:%S%z'))
     queryset = models.Repo.objects.filter(last_checked=None)
     if queryset.count() == 0:
-        queryset = models.Repo.objects.filter(last_checked__lt=time_threshold)
+        queryset = models.Repo.objects.filter(last_checked__lt=time_threshold).order_by('last_checked')
     if queryset.count() > 0:
         repo = queryset[0]
         repo_url = repo.url
@@ -99,7 +101,7 @@ def is_repo_public():
             last_checked = datetime.now(tz=utc)
             payload = {'last_checked':last_checked}
             r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo_node), data=payload)
-            print("[INFO] Repo is still public...")
+            print("[INFO] Repo is still public: {0}".format(repo_url))
             return True, 200
         #If we do too many requests and hit a rate limit, we can get 429 response
         elif r.status_code == 429:
@@ -122,3 +124,5 @@ def is_repo_public():
         else:
             err = "[ERROR] Unknown Errror - {0}".format(r.status_code)
             print(r.status_code)
+    else:
+        print("[INFO] Failed to find repo to test...")
