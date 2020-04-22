@@ -47,13 +47,50 @@ Main endpoints are /api/repo/ and /api/query/
 
 *  /api/query/ - Lists the current strings to use as search queries
 
-# Worker
+# Usage
 
-Currently the Repo model has a hook in the post save function to send newly saved github URLs to a celery worker queue which uses GitRecycle/tasks.py
+## General steps
+1. Start a redis docker instance
+1. Set up the DRF project
+1. Create a superuser 
+1. Start the DRF project
+1. Create some fixture data in the Query model.
+1. Start the project and beat worker
 
-## How to start worker
+## Docker
 
-From the root project directory, run the worker and the beat
+This uses Redis for both the broker and the backend service at the moment. You can use the default docker image for development.
+
+`docker pull redis`
+`docker run --name "GitRecycle-redis" -d -p 6379:6379 redis`
+
+## DRF
+
+Enter the project directory
+
+`cd GitRecycle`
+
+Make the migrations and create the db
+
+`python3 manage.py makemigrations && python3 manage.py migrate`
+
+Create your superuser
+
+`python3 manage.py createsuperuser --username scooty --email scooty@localhost`
+
+Start it like any other django project
+
+`python3 manage.py runserver 127.0.0.1:8000`
+
+Without any Query data, the workers can't search Github for repos and generate work. Go to the admin at http://127.0.0.1/admin/ and log in as the superuser. Go to the Query objects and click the + button to create a new Query object.
+
+## Celery Worker
+
+Currently Celery is hooked into the Repo model's post save function to send newly saved github repos to a celery worker queue which uses GitRecycle/tasks.py
+
+### How to start workers
+
+From the root DRF project directory, run the worker and the beat
 
 `celery -A GitRecycle worker -l debug -B`
 
@@ -64,3 +101,4 @@ Currently the beat is scheduled like this
 
 You can also POST repo info to the API or use the admin console to manually add and test
 
+The schedule needs to be played with more, tuned to avoid spammming with requests. ***Use at your own risk***
