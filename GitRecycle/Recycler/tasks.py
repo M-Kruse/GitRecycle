@@ -19,6 +19,8 @@ def clone_repo(pk):
         print(repo.url)
         print(repo.node)
         Git(archive_path).clone(repo.url.replace("https://","git://"))
+        #Add option for different backend like S3
+        #Add some error handling
         payload = {'archived':True}
         r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo.node), data=payload)
         print(r.status_code)
