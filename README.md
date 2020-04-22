@@ -1,6 +1,8 @@
+![image](https://user-images.githubusercontent.com/46699116/79948981-a8476c00-8429-11ea-94a0-8f95f1606902.png)
+
 # GitRecycle
 
-![image](https://user-images.githubusercontent.com/46699116/79946099-243eb580-8424-11ea-92b4-4f2b086e96a6.png)
+![image](https://user-images.githubusercontent.com/46699116/79948981-a8476c00-8429-11ea-94a0-8f95f1606902.png)
 
 This is a project to test the idea of creating a recycle bin for public github repos in order to find ones that are either deleted or went from public to private in a short timeframe, such as in the case of an accident or forced removal. This is the original idea, it may flux a bit.
 
@@ -53,9 +55,14 @@ Currently the Repo model has a hook in the post save function to send newly save
 
 ## How to start worker
 
-From the root project directory, run
+From the root project directory, run the worker and the beat
 
-`celery -A GitRecycle worker -l info`
+`celery -A GitRecycle worker -l debug -B`
 
-Then you can POST repo info to the API or use the admin console to manually add and test
+Currently the beat is scheduled like this
+	
+	* New repos are scheduled every minutes
+	* Repo visibility is scheduled every second
+
+You can also POST repo info to the API or use the admin console to manually add and test
 
