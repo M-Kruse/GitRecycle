@@ -14,20 +14,6 @@ The alerted repo can be dismissed or saved. If dismissed, the archived copy of t
 
 If the time limit expires, and the repo has not gone missing, the repo is considered to be stale and is deleted from storage.
 
-# Add some example query data
-
-Workers will call the API to get the keywords lists they are to search.
-
-`python manage.py shell`
-
-`for q in ['cve', 'malware', 'exploit', 'hack', 'bot', 'ransom', 'malicious', 'attack', 'deep', 'ml', 'machine learning', 'neural']: Query(string=q).save()`                                             
-
-
-```
-In [15]: Query.objects.all()                                                                                                                                                                                    
-Out[15]: <QuerySet [<Query: cve>, <Query: malware>, <Query: exploit>, <Query: hack>, <Query: bot>, <Query: ransom>, <Query: malicious>, <Query: attack>, <Query: deep>, <Query: ml>, <Query: machine learning>, <Query: neural>]>
-```
-
 # Why?
 
 I accidentally set a private repo to public in the past and know others that have too. This also happens when Github chooses or is forced to take down a repo. I recently thought what you might find with certain keywords if you started scraping new repos and saving/alerting to ones that vanish within a (short) period of time.
