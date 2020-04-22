@@ -1,4 +1,4 @@
-![image](https://user-images.githubusercontent.com/46699116/79948981-a8476c00-8429-11ea-94a0-8f95f1606902.png)
+![image](https://user-images.githubusercontent.com/46699116/79950662-40465500-842c-11ea-8c1f-c5e58c861dd2.png)
 
 # GitRecycle
 
