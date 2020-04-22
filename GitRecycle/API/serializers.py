@@ -14,7 +14,11 @@ class RepoSerializer(serializers.HyperlinkedModelSerializer):
 class QuerySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Query
-        fields = ['string', 'language']
+        fields = ['string', 'language', 'last_searched']
+
+    def get_serializer(self, *args, **kwargs):
+        kwargs['partial'] = True
+        return super(QuerySerializer, self).get_serializer(*args, **kwargs)
 
 class MissingRepoSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:

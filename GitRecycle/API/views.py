@@ -29,7 +29,7 @@ class FreshRepoViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Repo.objects.filter(stale=False)
     serializer_class = RepoSerializer
 
-class QueryViewSet(viewsets.ReadOnlyModelViewSet):
+class QueryViewSet(viewsets.ModelViewSet):
     queryset = Query.objects.all()
     serializer_class = QuerySerializer
 

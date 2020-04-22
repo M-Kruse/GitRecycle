@@ -21,6 +21,11 @@ class Query(models.Model):
                                         MinValueValidator(10)
                                         ]
                                 )
+    last_searched = models.DateTimeField(blank=True, null=True)
+    #Date
+    #Created Before/After
+    #Sort by
+
     def __str__(self):
         return self.string
 
@@ -38,10 +43,16 @@ class Repo(models.Model):
     stale_date = models.DateTimeField(blank=True, null=True)
     archive_loc = models.CharField(max_length=512, default="")
     missing = models.BooleanField(default=False)
+    #archive = models.ForeignKey('Archive', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.url
-    
+
+#Class Archive(models.Model)
+    #date_archived 
+    #location
+    #stale
+
 @receiver(post_save, sender=Repo)
 def repo_post_save(sender, instance, signal, *args, **kwargs):
     print("Praise the lawd, we clonin!")
