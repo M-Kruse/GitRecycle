@@ -84,9 +84,16 @@ You can also POST repo info to the API or use the admin console to manually add 
 
 The schedule needs to be played with more, tuned to avoid spammming with requests. ***Use at your own risk***
 
-# Images
+## React Frontend
 
-![image](https://user-images.githubusercontent.com/46699116/80027359-7d483100-8498-11ea-9107-cfa51fa07b6a.png)
+There is a simple react frontend to render a list of repos.
+
+![image](https://user-images.githubusercontent.com/46699116/80047048-3b7fb080-84c1-11ea-9adc-4390d086c036.png)
+
+`cd gitrecycle-frontend`  
+`yarn start` or `npm start`  
+
+If there are no errors, you can browse to the development server at http://127.0.0.1:3000
 
 # Endpoints
 
