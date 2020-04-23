@@ -2,7 +2,7 @@
 
 # GitRecycle
 
-This is a project to test the idea of creating a recycle bin for public github repos in order to find ones that are either deleted or went from public to private in a short timeframe, such as in the case of an accident or forced removal. This is the original idea, it may flux a bit.
+This is a project to test the idea of creating a recycle bin for public github repos in order to find ones that are either deleted or went from public to private in a timeframe, such as in the case of an accident or forced removal. This is the original idea, it may flux a bit.
 
 # How it works
 
@@ -16,22 +16,17 @@ If the time limit expires, and the repo has not gone missing, the repo is consid
 
 # Why?
 
-I accidentally set a private repo to public in the past and know others that have too. This also happens when Github chooses or is forced to take down a repo. I recently thought what you might find with certain keywords if you started scraping new repos and saving/alerting to ones that vanish within a (short) period of time.
+I once accidentally set a private repo to public and know others that have too. Github also chooses it as the default repo type when creating a new repo. A repo that Github chooses or is forced to take down will appear to go missing the same as if it went private. I recently thought about what data you might find with certain keywords if you started scraping repos and saving/alerting to ones that vanish within a (short) period of time. How much private data is being exposed that shouldn't have been. During initial testing, in the course of a few hours, searching one keyword, I captured 3 projects that went to private or were deleted. Two of those were just college homework projects, but did not come back as public projects either. The 3rd was an AI researchers project.
 
-# Endpoints
+# Stack
 
-Main endpoints are /api/repo/ and /api/query/
+This is in early development, so everything is configured to defaults for development and no auth.
 
-## Repo
-
-*  /api/repo/ - Lists all repos
-*  /api/repo/fresh/ - Lists repos that are still fresh and being checked
-*  /api/repo/stale/ - Lists repos that have gone stale
-*  /api/repo/archived/ - Lists repos that have been archived
-
-## Query
-
-*  /api/query/ - Lists the current strings to use as search queries
+* Python
+* Celery
+* Django
+* DRF
+* React
 
 # Usage
 
@@ -47,8 +42,8 @@ Main endpoints are /api/repo/ and /api/query/
 
 This uses Redis for both the broker and the backend service at the moment. You can use the default docker image for development.
 
-`docker pull redis`
-`docker run --name "GitRecycle-redis" -d -p 6379:6379 redis`
+`docker pull redis`  
+`docker run --name "GitRecycle-redis" -d -p 6379:6379 redis`  
 
 ## DRF
 
@@ -88,3 +83,22 @@ Currently the beat is scheduled like this
 You can also POST repo info to the API or use the admin console to manually add and test
 
 The schedule needs to be played with more, tuned to avoid spammming with requests. ***Use at your own risk***
+
+# Images
+
+![image](https://user-images.githubusercontent.com/46699116/80027359-7d483100-8498-11ea-9107-cfa51fa07b6a.png)
+
+# Endpoints
+
+Main endpoints are /api/repo/ and /api/query/
+
+## Repo
+
+*  /api/repo/ - Lists all repos
+*  /api/repo/fresh/ - Lists repos that are still fresh and being checked
+*  /api/repo/stale/ - Lists repos that have gone stale
+*  /api/repo/archived/ - Lists repos that have been archived
+
+## Query
+
+*  /api/query/ - Lists the current strings to use as search queries

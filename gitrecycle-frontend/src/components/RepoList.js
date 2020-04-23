@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { Table } from "reactstrap";
-import { ButtonToggle } from "reactstrap";
+import { Button } from "reactstrap";
 import { Badge } from "reactstrap";
 
 
@@ -34,6 +34,7 @@ class RepoList extends Component {
                 <td>{repo.last_checked}</td>
                 <td><Badge href="#" color={repo.archived ? 'success' : 'warning'}> {String(repo.archived)} </Badge> </td>
                 <td><Badge href="#" color={repo.missing ? 'success' : 'warning'}> {String(repo.missing)} </Badge> </td>
+                <td><Button color="primary" size="sm">Detail</Button>{' '}</td>
                 <td></td>
                 
               </tr>
