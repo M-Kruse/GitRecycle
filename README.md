@@ -37,6 +37,7 @@ This is in early development, so everything is configured to defaults for develo
 1. Start the DRF project
 1. Create some fixture data in the Query model.
 1. Start the project and beat worker
+1. Start the react frontend
 
 ## Docker
 
