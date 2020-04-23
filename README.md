@@ -23,6 +23,7 @@ I once accidentally set a private repo to public and know others that have too. 
 This is in early development, so everything is configured to defaults for development and no auth.
 
 * Python
+* Redis
 * Celery
 * Django
 * DRF
