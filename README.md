@@ -90,6 +90,12 @@ There is a simple react frontend to render a list of repos.
 
 ![image](https://user-images.githubusercontent.com/46699116/80047048-3b7fb080-84c1-11ea-9adc-4390d086c036.png)
 
+Install the dependencies
+
+`npm install --save reactstrap react react-dom`
+
+Start the project
+
 `cd gitrecycle-frontend`  
 `yarn start` or `npm start`  
 
