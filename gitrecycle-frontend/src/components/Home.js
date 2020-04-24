@@ -6,6 +6,8 @@ import axios from "axios";
 
 import { API_URL } from "../constants";
 
+const token = process.env.REACT_APP_GITRECYCLE_AUTH_TOKEN;
+
 class Home extends Component {
   state = {
     repos: []
@@ -16,8 +18,7 @@ class Home extends Component {
   }
 
   getRepos = () => {
-    axios.get(API_URL).then(res => this.setState({ repos: res.data }));
-    //axios.get(API_URL).then(res => console.log({ repos: res.data }));
+    axios.get(API_URL, { headers: {authorization : `Token ${token}`}}).then(res => this.setState({ repos: res.data }));
   };
 
   resetState = () => {
