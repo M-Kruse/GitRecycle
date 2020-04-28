@@ -18,11 +18,6 @@ import os
 
 import shutil
 
-#This is a hack to allow the project to start without an API auth token so that you can generate one.
-os.environ['GITRECYCLE_AUTH_TOKEN'] = ""
-
-auth_token = os.environ['GITRECYCLE_AUTH_TOKEN']
-
 repo_storage_path = os.environ['REPO_STORAGE_PATH']
 
 github_search_url = "https://api.github.com/search/repositories"
@@ -41,10 +36,8 @@ def clone_repo(repo_pk):
         Git(repo_storage_path).clone(repo.url.replace("https://","git://"))
         #Add option for different backend like S3
         #Add some error handling
-        payload = {'archived':True, 'archive_loc':repo_storage_path + repo.url.split("/")[-1]}
-        r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo.node), data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
-        #Add error handling
-        print(r.status_code)
+        repo.archive_path = repo_storage_path + repo.url.split("/")[-1]
+        repo.save()
 
 @periodic_task(run_every=(crontab(hour="*", minute="*")), name="search_repos_every_minute", ignore_result=True)
 def github_repo_search():
@@ -86,9 +79,7 @@ def github_repo_search():
                 except Exception as e:
                     print("[ERROR] Failed to process: {0} | ERROR: {1}".format(i['html_url'], e))
 
-
-
-@periodic_task(run_every=3, name="test_if_repo_public_every_second", ignore_result=True)
+@periodic_task(run_every=3, name="test_if_repo_public_every_3_second", ignore_result=True)
 def is_repo_public():
     """
     Test if the repo still is public or inaccessible, report back to the server the result
@@ -107,15 +98,11 @@ def is_repo_public():
         print("[INFO] Checking public repo: {0}".format(repo_url))
         r = requests.get(repo_url)
         if r.status_code == requests.codes.ok:
-            #We need to patch the objects last_checked time since we were successful
             utc = pytz.utc
             last_checked = datetime.now(tz=utc)
-            #payload = {'last_checked':last_checked}
             repo.last_checked = last_checked
             repo.save()
-            #r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo_node), data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
             print("[INFO] Repo is still public: {0}".format(repo_url))
-            return True, 200
         #If we do too many requests and hit a rate limit, we can get 429 response
         elif r.status_code == 429:
             err = "[ERROR] Triggered Status Code 429 - Too Many Requests "
@@ -136,7 +123,7 @@ def is_repo_public():
     else:
         print("[INFO] Failed to find repo to test...")
 
-@periodic_task(run_every=3, name="check_stale_repos_every_30_minute", ignore_result=True)
+@periodic_task(run_every=300, name="check_stale_repos_every_5_minute", ignore_result=True)
 def is_repo_stale():
     """
     Test if the repo has gone stale, past the expire time for it to be considered interesting anymore.
@@ -156,7 +143,7 @@ def is_repo_stale():
                     print("[INFO] Repo has gone stale {0} ...".format(repo.url))
 
 
-@periodic_task(run_every=60, name="remove_stale_repos_every_minute", ignore_result=True)
+@periodic_task(run_every=900, name="remove_stale_repos_every_15_minute", ignore_result=True)
 def remove_repo():
      try:
         queryset = models.Repo.objects.filter(archived=True, stale=True, missing=False)
@@ -170,7 +157,6 @@ def remove_repo():
                 #Little sanity check to make sure the path is not totally bogus
                 if repo_storage_path in repo.archive_loc:
                     print(shutil.rmtree(repo.archive_loc))
-                    #Repo.git.rm(repo.archive_loc, r=true) #This could be dangerous if the path is wrong, maybe validate it first.
                     #Test if the repo was succesfully removed
                     models.Repo.objects.get(pk=repo.node).delete()
                     print("[INFO] Deleted Repo: {0}".format(repo.url))

@@ -48,6 +48,15 @@ This uses Redis for both the broker and the backend service at the moment. You c
 `docker pull redis`  
 `docker run --name "GitRecycle-redis" -d -p 6379:6379 redis`  
 
+## Virtual Environment
+
+`virtualenv .venv`
+`source .venv/bin/activate`
+
+## PIP packages
+
+`pip3 install -r requirements.txt`
+
 ## DRF
 
 Enter the project directory
@@ -56,7 +65,7 @@ Enter the project directory
 
 Make the migrations and create the db
 
-`python3 manage.py makemigrations && python3 manage.py migrate`
+`python3 manage.py makemigrations Recycler && python3 manage.py migrate`
 
 Create your superuser
 

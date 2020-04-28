@@ -1,2 +1,3 @@
-djangorestframework
-django-cors-headers
+celery
+gitpython
+redis
