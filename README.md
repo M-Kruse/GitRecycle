@@ -77,11 +77,8 @@ Start it like any other django project
 
 Without any Query data, the workers can't search Github for repos and generate work. Go to the admin at http://127.0.0.1/admin/ and log in as the superuser. Go to the Query objects and click the + button to create a new Query object.
 
-The workers also need an Auth token to talk to the API. You can create one by going to http://127.0.0.1/admin/ clicking on Token and then creating a new token for your user.
-
 ## Environment Variables
 
-* GITRECYCLE_AUTH_TOKEN - This is the token you created in the step above
 * REPO_STORAGE_PATH - This is the path to where the repos will be saved
 
 ## Celery Worker
