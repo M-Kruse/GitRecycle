@@ -35,6 +35,7 @@ This is in early development, so everything is configured to defaults for develo
 1. Start a redis docker instance
 1. Set up the DRF project
 1. Create a superuser 
+1. Specifiy the repo storage path (I am using a NFS mount)
 1. Start the DRF project
 1. Create some fixture data in the Query model.
 1. Start the celery worker (doing work and beat scheduling)
@@ -66,6 +67,13 @@ Start it like any other django project
 `python3 manage.py runserver 127.0.0.1:8000`
 
 Without any Query data, the workers can't search Github for repos and generate work. Go to the admin at http://127.0.0.1/admin/ and log in as the superuser. Go to the Query objects and click the + button to create a new Query object.
+
+The workers also need an Auth token to talk to the API. You can create one by going to http://127.0.0.1/admin/ clicking on Token and then creating a new token for your user.
+
+## Environment Variables
+
+* GITRECYCLE_AUTH_TOKEN - This is the token you created in the step above
+* REPO_STORAGE_PATH - This is the path to where the repos will be saved
 
 ## Celery Worker
 

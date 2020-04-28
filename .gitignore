@@ -116,3 +116,10 @@ GitHub.sublime-settings
 .history
 
 **/migrations/*
+
+#My junk
+.notes
+
+#Beat schedule
+celerybeat-schedule
+

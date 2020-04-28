@@ -20,7 +20,8 @@ import shutil
 
 auth_token = os.environ['GITRECYCLE_AUTH_TOKEN']
 
-archive_path = "/mnt/Personal/ApplicationData/GitRecycle/archives/"
+repo_storage_path = os.environ['REPO_STORAGE_PATH']
+
 github_search_url = "https://api.github.com/search/repositories"
 
 logger = get_task_logger(__name__)
@@ -33,10 +34,10 @@ def clone_repo(repo_pk):
         repo = None
     if repo:
         print("Cloning {0}".format(repo))
-        Git(archive_path).clone(repo.url.replace("https://","git://"))
+        Git(repo_storage_path).clone(repo.url.replace("https://","git://"))
         #Add option for different backend like S3
         #Add some error handling
-        payload = {'archived':True, 'archive_loc':archive_path + repo.url.split("/")[-1]}
+        payload = {'archived':True, 'archive_loc':repo_storage_path + repo.url.split("/")[-1]}
         r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo.node), data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
         #Add error handling
         print(r.status_code)
@@ -166,7 +167,7 @@ def remove_repo():
         if repo.archive_loc:
             if os.path.isdir(repo.archive_loc):
                 #Little sanity check to make sure the path is not totally bogus
-                if archive_path in repo.archive_loc:
+                if repo_storage_path in repo.archive_loc:
                     print(shutil.rmtree(repo.archive_loc))
                     #Repo.git.rm(repo.archive_loc, r=true) #This could be dangerous if the path is wrong, maybe validate it first.
                     #Test if the repo was succesfully removed
@@ -180,28 +181,10 @@ def remove_repo():
 def get_storage_metrics():
     try:
         total_size = 0
-        for path, dirs, files in os.walk(archive_path):
+        for path, dirs, files in os.walk(repo_storage_path):
             for f in files:
                 fp = os.path.join(path,f)
                 total_size += os.path.getsize(fp)
         print('Repo Storage Size: {:,} GB'.format(int(total_size/1024**3)).replace(',', ' '))
     except Exception as e:
         print(e)
-
-     #        queryset = models.Repo.objects.filter(archived=True, stale=True, missing=False)
-     # except models.Repo.DoesNotExist:
-     #    queryset = None
-     # if queryset.count() > 0:
-     #    repo = queryset.first()
-     #    print("[INFO] Deleting Repo: {0}".format(repo.url))
-     #    if repo.archive_loc:
-     #        if os.path.isdir(repo.archive_loc):
-     #            #Little sanity check to make sure the path is not totally bogus
-     #            if archive_path in repo.archive_loc:
-     #                print(shutil.rmtree(repo.archive_loc))
-     #                #Repo.git.rm(repo.archive_loc, r=true) #This could be dangerous if the path is wrong, maybe validate it first.
-     #                #Test if the repo was succesfully removed
-     #                models.Repo.objects.get(pk=repo.node).delete()
-     #                print("[INFO] Deleted Repo: {0}".format(repo.url))
-     #        else:
-     #            print("[ERROR] Could not validate archive location in order to delete: {0}".format(repo.archive_loc))                
