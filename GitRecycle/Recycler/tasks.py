@@ -32,28 +32,28 @@ def clone_repo(repo_pk):
     except models.Repo.DoesNotExist:
         repo = None
     if repo:
-        print("Cloning {0}".format(repo))
-        Git(repo_storage_path).clone(repo.url.replace("https://","git://"))
-        #Add option for different backend like S3
-        #Add some error handling
-        repo.archive_path = repo_storage_path + repo.url.split("/")[-1]
-        repo.save()
+        try:
+            print("Cloning {0}".format(repo))
+            Git(repo_storage_path).clone(repo.url.replace("https://","git://"))
+            #Add option for different backend like S3
+            #Add some error handling
+            repo.archived = True
+            repo.archive_loc = repo_storage_path + repo.url.split("/")[-1]
+            repo.save()
+        except Exception as e:
+            print("[ERROR] Failed to clone repo {0} | ERROR {1}".format(repo.url, e))
 
 @periodic_task(run_every=(crontab(hour="*", minute="*")), name="search_repos_every_minute", ignore_result=True)
 def github_repo_search():
     """
     This searches Github for repos and then POSTs the repos back to the server.
     """
-    now = datetime.now()
-    print(now.strftime('%Y-%m-%dT%H:%M:%S%z'))
-    time_threshold = now - timedelta(seconds=60)
-    #print(time_threshold.strftime('%Y-%m-%dT%H:%M:%S%z'))
+    time_threshold = datetime.now() - timedelta(seconds=60)
     queryset = models.Query.objects.filter(last_searched=None)
     if queryset.count() == 0:
         queryset = models.Query.objects.filter(last_searched__lt=time_threshold)
     if queryset.count() > 0:
         query = queryset[0]
-        print(query)
         query_string = query.string
         lang_string = query.language
         if lang_string:
@@ -65,63 +65,65 @@ def github_repo_search():
         if r.status_code == requests.codes.ok:
             utc = pytz.utc
             last_searched = datetime.now(tz=utc)
-            payload = {"last_searched":last_searched}
-            last_search = requests.patch("http://127.0.0.1:8000/api/query/{0}/".format(query.id), data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
+            query.last_search = last_searched
             print("Found {0} Repos".format(len(r.json()['items'])))
             for idx, i in enumerate(r.json()['items']):
                 print(idx)
                 try:
                     utc = pytz.utc
                     last_checked = datetime.now(tz=utc)
-                    new_repo = models.Repo(node=i['node_id'], url=i['html_url'], create_date=i['created_at'], description=i['description'], last_checked=last_checked)
+                    new_repo = models.Repo(
+                        node=i['node_id'],
+                        url=i['html_url'],
+                        create_date=i['created_at'],
+                        description=i['description'],
+                        last_checked=last_checked,
+                        archive_loc=repo_storage_path + i['url'].split("/")[-1]
+                    )
                     #Add error handling here
                     new_repo.save()
                 except Exception as e:
                     print("[ERROR] Failed to process: {0} | ERROR: {1}".format(i['html_url'], e))
 
-@periodic_task(run_every=3, name="test_if_repo_public_every_3_second", ignore_result=True)
+@periodic_task(run_every=5, name="test_if_repo_public_every_3_second", ignore_result=True)
 def is_repo_public():
     """
-    Test if the repo still is public or inaccessible, report back to the server the result
+    Test if the repo still is public or inaccessible, save the result.
     """
-    now = datetime.now()
-    print(now.strftime('%Y-%m-%dT%H:%M:%S%z'))
-    time_threshold = now - timedelta(seconds=60)
-    #print(time_threshold.strftime('%Y-%m-%dT%H:%M:%S%z'))
-    queryset = models.Repo.objects.filter(last_checked=None)
-    if queryset.count() == 0:
-        queryset = models.Repo.objects.filter(last_checked__lt=time_threshold).order_by('last_checked')
-    if queryset.count() > 0:
-        repo = queryset[0]
-        repo_url = repo.url
-        repo_node = repo.node
-        print("[INFO] Checking public repo: {0}".format(repo_url))
-        r = requests.get(repo_url)
-        if r.status_code == requests.codes.ok:
-            utc = pytz.utc
-            last_checked = datetime.now(tz=utc)
-            repo.last_checked = last_checked
-            repo.save()
-            print("[INFO] Repo is still public: {0}".format(repo_url))
-        #If we do too many requests and hit a rate limit, we can get 429 response
-        elif r.status_code == 429:
-            err = "[ERROR] Triggered Status Code 429 - Too Many Requests "
-            print(err)
-        #We assume this means that the repo has gone missing. The server will check it as well for sanity.
-        elif r.status_code == 404:
-            print("[INFO] DETECTED MISSING REPO!!")
-            utc = pytz.utc
-            last_checked = datetime.now(tz=utc)
-            #We send a Patch with a bool to indicate it went missing
-            payload = {'last_checked':last_checked, 'missing':True}
-            repo.missing = True
-            repo.last_checked = last_checked
-            repo.save()
+    try:
+        print("HELLO")
+        time_threshold = datetime.now() - timedelta(seconds=60)
+        queryset = models.Repo.objects.filter(last_checked=None)
+        print("QUERYSET: {0}".format(queryset))
+        if queryset.count() == 0:
+            queryset = models.Repo.objects.filter(last_checked__lt=time_threshold).order_by('last_checked')
+        if queryset.count() > 0:
+            repo = queryset[0]
+            repo_url = repo.url
+            repo_node = repo.node
+            print("[INFO] Checking public repo: {0}".format(repo_url))
+            r = requests.get(repo_url)
+            if r.status_code == requests.codes.ok:
+                repo.last_checked = datetime.now(tz=pytz.utc)
+                repo.save()
+                print("[INFO] Repo is still public: {0}".format(repo_url))
+            #If we do too many requests and hit a rate limit, we can get 429 response
+            elif r.status_code == 429:
+                err = "[ERROR] Triggered Status Code 429 - Too Many Requests "
+                print(err)
+            #We assume this means that the repo has gone missing. The server will check it as well for sanity.
+            elif r.status_code == 404:
+                print("[INFO] DETECTED MISSING REPO!!")
+                repo.missing = True
+                repo.last_checked = datetime.now(tz=pytz.utc)
+                repo.save()
+            else:
+                err = "[ERROR] Unknown Errror - {0}".format(r.status_code)
+                print(err)
         else:
-            err = "[ERROR] Unknown Errror - {0}".format(r.status_code)
-            print(err)
-    else:
-        print("[INFO] Failed to find repo to test...")
+            print("[INFO] Failed to find repo to test...")
+    except Exception as e:
+        print("[ERROR] Failed to check public repo: {0} | {1}".format(repo.url, e))
 
 @periodic_task(run_every=300, name="check_stale_repos_every_5_minute", ignore_result=True)
 def is_repo_stale():
@@ -164,14 +166,14 @@ def remove_repo():
                 print("[ERROR] Could not validate archive location in order to delete: {0}".format(repo.archive_loc))
 
 
-@periodic_task(run_every=60, name="get_storage_metrics_every_minute", ignore_result=True)
-def get_storage_metrics():
-    try:
-        total_size = 0
-        for path, dirs, files in os.walk(repo_storage_path):
-            for f in files:
-                fp = os.path.join(path,f)
-                total_size += os.path.getsize(fp)
-        print('Repo Storage Size: {:,} GB'.format(int(total_size/1024**3)).replace(',', ' '))
-    except Exception as e:
-        print(e)
+# @periodic_task(run_every=60, name="get_storage_metrics_every_minute", ignore_result=True)
+# def get_storage_metrics():
+#     try:
+#         total_size = 0
+#         for path, dirs, files in os.walk(repo_storage_path):
+#             for f in files:
+#                 fp = os.path.join(path,f)
+#                 total_size += os.path.getsize(fp)
+#         print('Repo Storage Size: {:,} GB'.format(int(total_size/1024**3)).replace(',', ' '))
+#     except Exception as e:
+#         print(e)
