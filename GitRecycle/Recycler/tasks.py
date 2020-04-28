@@ -18,6 +18,9 @@ import os
 
 import shutil
 
+#This is a hack to allow the project to start without an API auth token so that you can generate one.
+os.environ['GITRECYCLE_AUTH_TOKEN'] = ""
+
 auth_token = os.environ['GITRECYCLE_AUTH_TOKEN']
 
 repo_storage_path = os.environ['REPO_STORAGE_PATH']
@@ -30,6 +33,7 @@ logger = get_task_logger(__name__)
 def clone_repo(repo_pk):
     try:
         repo = models.Repo.objects.get(pk=repo_pk, archived=False)
+        print(repo)
     except models.Repo.DoesNotExist:
         repo = None
     if repo:
@@ -55,8 +59,8 @@ def github_repo_search():
     if queryset.count() == 0:
         queryset = models.Query.objects.filter(last_searched__lt=time_threshold)
     if queryset.count() > 0:
-        print("CRON TASK WORKING")
         query = queryset[0]
+        print(query)
         query_string = query.string
         lang_string = query.language
         if lang_string:
@@ -76,11 +80,11 @@ def github_repo_search():
                 try:
                     utc = pytz.utc
                     last_checked = datetime.now(tz=utc)
-                    #There might be a way to have celery worker return this info instead of POSTing to API
-                    payload = {"url":i['html_url'], "node":i['node_id'], "create_date":i['created_at'], "description":i['description'], "last_checked":last_checked}
-                    bombs_away = requests.post("http://127.0.0.1:8000/api/repo/", data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
-                except:
-                    print("[ERROR] Failed to process: {0}".format(i['html_url']))
+                    new_repo = models.Repo(node=i['node_id'], url=i['html_url'], create_date=i['created_at'], description=i['description'], last_checked=last_checked)
+                    #Add error handling here
+                    new_repo.save()
+                except Exception as e:
+                    print("[ERROR] Failed to process: {0} | ERROR: {1}".format(i['html_url'], e))
 
 
 
@@ -100,14 +104,16 @@ def is_repo_public():
         repo = queryset[0]
         repo_url = repo.url
         repo_node = repo.node
-        print(repo_url)
+        print("[INFO] Checking public repo: {0}".format(repo_url))
         r = requests.get(repo_url)
         if r.status_code == requests.codes.ok:
             #We need to patch the objects last_checked time since we were successful
             utc = pytz.utc
             last_checked = datetime.now(tz=utc)
-            payload = {'last_checked':last_checked}
-            r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo_node), data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
+            #payload = {'last_checked':last_checked}
+            repo.last_checked = last_checked
+            repo.save()
+            #r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo_node), data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
             print("[INFO] Repo is still public: {0}".format(repo_url))
             return True, 200
         #If we do too many requests and hit a rate limit, we can get 429 response
@@ -121,20 +127,15 @@ def is_repo_public():
             last_checked = datetime.now(tz=utc)
             #We send a Patch with a bool to indicate it went missing
             payload = {'last_checked':last_checked, 'missing':True}
-            r = requests.patch("http://127.0.0.1:8000/api/repo/{0}/".format(repo_node), data=payload, headers={'Authorization': 'Token {0}'.format(auth_token)})
-            if r.status_code == 200:
-                print("[INFO] Updated Last Checked Time")
-            else:
-                err = "[ERROR] Failed To Update Last Checked Time | HTTP Status Code {0}".format(r.status_code)
-                print(err)
-            return False
+            repo.missing = True
+            repo.last_checked = last_checked
+            repo.save()
         else:
             err = "[ERROR] Unknown Errror - {0}".format(r.status_code)
-            print(r.status_code)
+            print(err)
     else:
         print("[INFO] Failed to find repo to test...")
 
-#@periodic_task(run_every=crontab(hour="*", minute="30"), name="check_stale_repos_every_30_minute", ignore_result=True)
 @periodic_task(run_every=3, name="check_stale_repos_every_30_minute", ignore_result=True)
 def is_repo_stale():
     """

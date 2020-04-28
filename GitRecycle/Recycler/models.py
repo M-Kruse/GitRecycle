@@ -61,7 +61,7 @@ class MissingRepo(models.Model):
 
 @receiver(post_save, sender=Repo)
 def repo_post_save(sender, instance, signal, *args, **kwargs):
-    # Do some error handling here 
+    # Do some error handling here
     r = clone_repo.delay(instance.pk)
     print(r.task_id)
     return r
