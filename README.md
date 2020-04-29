@@ -32,14 +32,24 @@ This is in early development, so everything is configured to defaults for develo
 # Usage
 
 ## General steps
+
 1. Start a redis docker instance
 1. Set up the DRF project
 1. Create a superuser 
-1. Specifiy the repo storage path (I am using a NFS mount)
+1. Export the repo storage path environment variable (I am using a NFS mount)
 1. Start the DRF project
+1. Create an Auth token for the React frontend.
 1. Create some fixture data in the Query model.
 1. Start the celery worker (doing work and beat scheduling)
+1. Set the Auth Token environment variable
 1. Start the react frontend
+
+## Environment Variables
+
+In this development project, these are passed in when running the backend Django and frontend React processes.
+
+* REACT_APP_GITRECYCLE_AUTH_TOKEN - This is the token for the react frontend
+* REPO_STORAGE_PATH - This is the path to where the repos will be saved
 
 ## Docker
 
@@ -73,13 +83,11 @@ Create your superuser
 
 Start it like any other django project
 
-`python3 manage.py runserver 127.0.0.1:8000`
+`REPO_STORAGE_PATH=/var/nfs/path/to/repo_archive python3 manage.py runserver 127.0.0.1:8000`
 
 Without any Query data, the workers can't search Github for repos and generate work. Go to the admin at http://127.0.0.1/admin/ and log in as the superuser. Go to the Query objects and click the + button to create a new Query object.
 
-## Environment Variables
-
-* REPO_STORAGE_PATH - This is the path to where the repos will be saved
+You will need an Auth token for the React frontend. You can create one by going to http://127.0.0.1/admin/ clicking on Token and then creating a new token for your user.
 
 ## Celery Worker
 
@@ -106,20 +114,18 @@ There is a simple react frontend to render a list of repos.
 
 ![image](https://user-images.githubusercontent.com/46699116/80047048-3b7fb080-84c1-11ea-9adc-4390d086c036.png)
 
-Install the dependencies
+Install the dependencies (npm or yarn)
 
-`npm install --save reactstrap react react-dom`
+`cd gitrecycle-frontend`
+`npm install --save reactstrap react react-dom axios`
 
-Start the project
+Export the Auth token and start the project
 
-`cd gitrecycle-frontend`  
-`yarn start` or `npm start`  
+`REACT_APP_GITRECYCLE_AUTH_TOKEN="abc123zyz npm start`
 
 If there are no errors, you can browse to the development server at http://127.0.0.1:3000
 
 # Endpoints
-
-Main endpoints are /api/repo/ and /api/query/
 
 ## Repo
 
@@ -127,9 +133,6 @@ Main endpoints are /api/repo/ and /api/query/
 *  /api/repo/missing/ - Lists repo that have been detec
 *  /api/repo/fresh/ - Lists repos that are still fresh and being checked
 *  /api/repo/stale/ - Lists repos that have gone stale
-*  /api/repo/archived/ - Lists repos that have been archived
-
-ted as missing
 
 ## Query
 

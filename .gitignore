@@ -122,5 +122,3 @@ GitHub.sublime-settings
 
 #Beat schedule
 celerybeat-schedule
-
-node_modules/
