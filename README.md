@@ -46,8 +46,6 @@ This is in early development, so everything is configured to defaults for develo
 
 ## Environment Variables
 
-In this development project, these are passed in when running the backend Django and frontend React processes.
-
 * REACT_APP_GITRECYCLE_AUTH_TOKEN - This is the token for the react frontend
 * REPO_STORAGE_PATH - This is the path to where the repos will be saved
 
