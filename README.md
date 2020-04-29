@@ -125,7 +125,7 @@ Install the dependencies (npm or yarn)
 
 Export the Auth token and start the project
 
-`REACT_APP_GITRECYCLE_AUTH_TOKEN="abc123zyz npm start`
+`REACT_APP_GITRECYCLE_AUTH_TOKEN=abc123zyz npm start`
 
 If there are no errors, you can browse to the development server at http://127.0.0.1:3000
 
