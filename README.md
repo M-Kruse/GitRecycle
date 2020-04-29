@@ -121,7 +121,7 @@ There is a simple react frontend to render a list of repos.
 Install the dependencies (npm or yarn)
 
 `cd gitrecycle-frontend`  
-`npm install --save reactstrap react react-dom axios`  
+`npm install`  
 
 Export the Auth token and start the project
 
