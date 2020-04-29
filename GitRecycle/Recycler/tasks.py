@@ -28,20 +28,23 @@ logger = get_task_logger(__name__)
 def clone_repo(repo_pk):
     try:
         repo = models.Repo.objects.get(pk=repo_pk, archived=False)
-        print(repo)
     except models.Repo.DoesNotExist:
         repo = None
     if repo:
         try:
-            print("Cloning {0}".format(repo))
-            Git(repo_storage_path).clone(repo.url.replace("https://","git://"))
+            logger.info("Cloning {0}".format(repo))
+            repo_owner = repo.url.split("/")[-2]
+            repo_path = repo_storage_path + "{}/".format(repo_owner) + repo.node
+            if not os.path.exists(repo_path):
+                os.makedirs(repo_path)
+            Git(repo_path).clone(repo.url.replace("https://","git://"))
             #Add option for different backend like S3
             #Add some error handling
             repo.archived = True
-            repo.archive_loc = repo_storage_path + repo.url.split("/")[-1]
+            repo.archive_loc = repo_path
             repo.save()
         except Exception as e:
-            print("[ERROR] Failed to clone repo {0} | ERROR {1}".format(repo.url, e))
+            logger.error("[ERROR] Failed to clone repo {0} | ERROR {1}".format(repo.url, e))
 
 @periodic_task(run_every=(crontab(hour="*", minute="*")), name="search_repos_every_minute", ignore_result=True)
 def github_repo_search():
@@ -60,15 +63,15 @@ def github_repo_search():
             search_param = "?q={0}+language:{1}&sort=updated&per_page=100&".format(query_string, lang_string)
         else:
             search_param = "?q={0}&sort=updated&per_page=100".format(query_string)
-        print(github_search_url + search_param)
         r = requests.get(github_search_url + search_param)
         if r.status_code == requests.codes.ok:
             utc = pytz.utc
             last_searched = datetime.now(tz=utc)
             query.last_search = last_searched
-            print("Found {0} Repos".format(len(r.json()['items'])))
+            logger.info("Found {0} Repos". format(len(r.json()['items'])))
             for idx, i in enumerate(r.json()['items']):
-                print(idx)
+                if models.Repo.objects.filter(node=i['node_id']).exists():
+                    continue
                 try:
                     utc = pytz.utc
                     last_checked = datetime.now(tz=utc)
@@ -83,7 +86,7 @@ def github_repo_search():
                     #Add error handling here
                     new_repo.save()
                 except Exception as e:
-                    print("[ERROR] Failed to process: {0} | ERROR: {1}".format(i['html_url'], e))
+                    logger.error("[ERROR] Failed to process: {0} | ERROR: {1}".format(i['html_url'], e))
 
 @periodic_task(run_every=5, name="test_if_repo_public_every_3_second", ignore_result=True)
 def is_repo_public():
@@ -91,39 +94,35 @@ def is_repo_public():
     Test if the repo still is public or inaccessible, save the result.
     """
     try:
-        print("HELLO")
-        time_threshold = datetime.now() - timedelta(seconds=60)
+        time_threshold = datetime.now(tz=pytz.utc) - timedelta(seconds=144000)
         queryset = models.Repo.objects.filter(last_checked=None)
-        print("QUERYSET: {0}".format(queryset))
         if queryset.count() == 0:
-            queryset = models.Repo.objects.filter(last_checked__lt=time_threshold).order_by('last_checked')
+            queryset = models.Repo.objects.all().order_by('last_checked')
         if queryset.count() > 0:
             repo = queryset[0]
             repo_url = repo.url
             repo_node = repo.node
-            print("[INFO] Checking public repo: {0}".format(repo_url))
+            logger.info("[INFO] Checking public repo: {0}".format(repo_url))
             r = requests.get(repo_url)
             if r.status_code == requests.codes.ok:
                 repo.last_checked = datetime.now(tz=pytz.utc)
                 repo.save()
-                print("[INFO] Repo is still public: {0}".format(repo_url))
+                logger.info("[INFO] Repo is still public: {0}".format(repo_url))
             #If we do too many requests and hit a rate limit, we can get 429 response
             elif r.status_code == 429:
-                err = "[ERROR] Triggered Status Code 429 - Too Many Requests "
-                print(err)
+                logger.error("[ERROR] Triggered Status Code 429 - Too Many Requests ")
             #We assume this means that the repo has gone missing. The server will check it as well for sanity.
             elif r.status_code == 404:
-                print("[INFO] DETECTED MISSING REPO!!")
+                logger.info("[INFO] DETECTED MISSING REPO!!")
                 repo.missing = True
                 repo.last_checked = datetime.now(tz=pytz.utc)
                 repo.save()
             else:
-                err = "[ERROR] Unknown Errror - {0}".format(r.status_code)
-                print(err)
+                logger.error("[ERROR] Unknown Errror - {0}".format(r.status_code))
         else:
-            print("[INFO] Failed to find repo to test...")
+            logger.info("[INFO] Failed to find repo to test...")
     except Exception as e:
-        print("[ERROR] Failed to check public repo: {0} | {1}".format(repo.url, e))
+        logger.error("[ERROR] Failed to check public repo: {0} | {1}".format(repo.url, e))
 
 @periodic_task(run_every=300, name="check_stale_repos_every_5_minute", ignore_result=True)
 def is_repo_stale():
@@ -132,17 +131,17 @@ def is_repo_stale():
     """
     # scrape_date - deltatime()
     try:
-        queryset = models.Repo.objects.filter(archived=True)
+        queryset = models.Repo.objects.filter(archived=True, stale=False)
     except models.Repo.DoesNotExist:
         queryset = None
     if queryset:
         if queryset.count() > 0:
             for repo in queryset:
-                stale_time = repo.scrape_date + timedelta(minutes=1) #Stale time
+                stale_time = repo.scrape_date + timedelta(minutes=30) #Stale time
                 if datetime.now(timezone.utc) >= stale_time:
                     repo.stale = True
                     repo.save()
-                    print("[INFO] Repo has gone stale {0} ...".format(repo.url))
+                    logger.info("[INFO] Repo has gone stale {0} ...".format(repo.url))
 
 
 @periodic_task(run_every=900, name="remove_stale_repos_every_15_minute", ignore_result=True)
@@ -153,18 +152,17 @@ def remove_repo():
         queryset = None
      if queryset.count() > 0:
         repo = queryset.first()
-        print("[INFO] Deleting Repo: {0}".format(repo.url))
+        logger.info("[INFO] Deleting Repo: {0}".format(repo.url))
         if repo.archive_loc:
             if os.path.isdir(repo.archive_loc):
                 #Little sanity check to make sure the path is not totally bogus
                 if repo_storage_path in repo.archive_loc:
-                    print(shutil.rmtree(repo.archive_loc))
+                    shutil.rmtree(repo.archive_loc)
                     #Test if the repo was succesfully removed
                     models.Repo.objects.get(pk=repo.node).delete()
-                    print("[INFO] Deleted Repo: {0}".format(repo.url))
+                    logger.info("[INFO] Deleted Repo: {0}".format(repo.url))
             else:
-                print("[ERROR] Could not validate archive location in order to delete: {0}".format(repo.archive_loc))
-
+                logger.error("[ERROR] Could not validate archive location in order to delete: {0}".format(repo.archive_loc))
 
 # @periodic_task(run_every=60, name="get_storage_metrics_every_minute", ignore_result=True)
 # def get_storage_metrics():

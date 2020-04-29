@@ -62,12 +62,14 @@ class MissingRepo(models.Model):
 @receiver(post_save, sender=Repo)
 def repo_post_save(sender, instance, signal, *args, **kwargs):
     # Do some error handling here
-    print(instance.archived)
     if instance.archived == False:
         r = clone_repo.delay(instance.pk)
         return r
     else:
         return None
+
+# class RecycleSettings(models.Model):
+#     repo_search_frequency
 
 #class AnalyticsReport(models.Model):
     #storage_used

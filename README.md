@@ -91,12 +91,12 @@ From the root DRF project directory, run the worker and the beat
 
 `celery -A GitRecycle worker -l debug -B`
 
-Currently the beat is scheduled like this
+Currently the celery worker schedule is like this
 	
-	* New repos are scheduled every minutes
-	* Repo visibility is scheduled every second
-
-You can also POST repo info to the API or use the admin console to manually add and test
+	* New repos are scheduled every minute
+	* Repo visibility is scheduled every 3 seconds
+	* Repos are checked for being stale every 5 minutes
+	* Stale repos are deleted every 15 minutes
 
 The schedule needs to be played with more, tuned to avoid spammming with requests. ***Use at your own risk***
 
@@ -124,9 +124,12 @@ Main endpoints are /api/repo/ and /api/query/
 ## Repo
 
 *  /api/repo/ - Lists all repos
+*  /api/repo/missing/ - Lists repo that have been detec
 *  /api/repo/fresh/ - Lists repos that are still fresh and being checked
 *  /api/repo/stale/ - Lists repos that have gone stale
 *  /api/repo/archived/ - Lists repos that have been archived
+
+ted as missing
 
 ## Query
 
