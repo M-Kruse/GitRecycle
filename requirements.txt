@@ -1,3 +1,6 @@
 celery
 gitpython
 redis
+django
+djangorestframework
+django-cors-headers
