@@ -69,6 +69,10 @@ This uses Redis for both the broker and the backend service at the moment. You c
 
 ## DRF
 
+Export the path for repo storage
+
+`export REPO_STORAGE_PATH="/var/nfs/path/to/storage/"`
+
 Enter the project directory
 
 `cd GitRecycle`
@@ -83,7 +87,7 @@ Create your superuser
 
 Start it like any other django project
 
-`REPO_STORAGE_PATH=/var/nfs/path/to/repo_archive python3 manage.py runserver 127.0.0.1:8000`
+`python3 manage.py runserver 127.0.0.1:8000`
 
 Without any Query data, the workers can't search Github for repos and generate work. Go to the admin at http://127.0.0.1/admin/ and log in as the superuser. Go to the Query objects and click the + button to create a new Query object.
 
@@ -95,7 +99,7 @@ Currently Celery is hooked into the Repo model's post save function to send newl
 
 ### How to start workers
 
-From the root DRF project directory, run the worker and the beat
+From the root DRF project directory, same as where manage.py lives, run the worker and the beat
 
 `celery -A GitRecycle worker -l debug -B`
 
