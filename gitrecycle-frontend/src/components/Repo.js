@@ -6,6 +6,8 @@ import axios from "axios";
 
 import { API_URL_MISSING } from "../constants";
 
+const token = process.env.REACT_APP_GITRECYCLE_AUTH_TOKEN;
+
 class Home extends Component {
   state = {
     repos: []
@@ -15,8 +17,8 @@ class Home extends Component {
     this.resetState();
   }
 
-  getStudents = () => {
-    axios.get(API_URL_MISSING).then(res => this.setState({ repos: res.data }));
+  getRepos = () => {
+    axios.get(API_URL_MISSING, { headers: {authorization : `Token ${token}`}}).then(res => this.setState({ repos: res.data }));
   };
 
   resetState = () => {
@@ -34,6 +36,7 @@ class Home extends Component {
             />
           </Col>
         </Row>
+
       </Container>
     );
   }

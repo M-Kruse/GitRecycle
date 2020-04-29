@@ -2,13 +2,14 @@ import React, { Component } from "react";
 import { Table } from "reactstrap";
 import { Button } from "reactstrap";
 import { Badge } from "reactstrap";
+import { Header } from "reactstrap";
 import BootstrapTable from 'react-bootstrap-table-next';
   
 class RepoList extends Component {
   render() {
     const repos = this.props.repos;
     return (
-      <Table dark>
+      <Table size="sm">
         <thead>
           <tr>
             <th>URL</th>
@@ -22,7 +23,7 @@ class RepoList extends Component {
         <tbody>
           {!repos || repos.length <= 0 ? (
             <tr>
-              <td colSpan="6" align="center">
+              <td colSpan="1" align="center">
                 <b>No Repo Data Found</b>
               </td>
             </tr>
