@@ -60,8 +60,8 @@ This uses Redis for both the broker and the backend service at the moment. You c
 
 ## Virtual Environment
 
-`virtualenv .venv`
-`source .venv/bin/activate`
+`virtualenv .venv`  
+`source .venv/bin/activate`  
 
 ## PIP packages
 
