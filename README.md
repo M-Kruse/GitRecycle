@@ -46,8 +46,6 @@ This is in early development, so everything is configured to defaults for develo
 
 ## Environment Variables
 
-In this development project, these are passed in when running the backend Django and frontend React processes.
-
 * REACT_APP_GITRECYCLE_AUTH_TOKEN - This is the token for the react frontend
 * REPO_STORAGE_PATH - This is the path to where the repos will be saved
 
@@ -125,7 +123,7 @@ Install the dependencies (npm or yarn)
 
 Export the Auth token and start the project
 
-`REACT_APP_GITRECYCLE_AUTH_TOKEN="abc123zyz npm start`
+`REACT_APP_GITRECYCLE_AUTH_TOKEN=abc123zyz npm start`
 
 If there are no errors, you can browse to the development server at http://127.0.0.1:3000
 
