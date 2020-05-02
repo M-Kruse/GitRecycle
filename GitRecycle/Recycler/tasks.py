@@ -88,7 +88,7 @@ def github_repo_search():
                 except Exception as e:
                     logger.error("[ERROR] Failed to process: {0} | ERROR: {1}".format(i['html_url'], e))
 
-@periodic_task(run_every=5, name="test_if_repo_public_every_3_second", ignore_result=True)
+@periodic_task(run_every=3, name="test_if_repo_public_every_3_second", ignore_result=True)
 def is_repo_public():
     """
     Test if the repo still is public or inaccessible, save the result.
