@@ -112,9 +112,15 @@ The schedule needs to be played with more, tuned to avoid spammming with request
 
 ## React Frontend
 
-There is a simple react frontend to render a list of repos.
+There is a simple react frontend to render query and repo lists.
 
-![image](https://user-images.githubusercontent.com/46699116/80047048-3b7fb080-84c1-11ea-9adc-4390d086c036.png)
+
+![image](https://user-images.githubusercontent.com/46699116/80853111-e93a4000-8be2-11ea-90b6-31ec94793a4c.png)
+
+![image](https://user-images.githubusercontent.com/46699116/80853153-33232600-8be3-11ea-8e7a-c6179aee5541.png)
+
+![image](https://user-images.githubusercontent.com/46699116/80853106-e0e20500-8be2-11ea-9ebd-7a7a536ce839.png)
+
 
 Install the dependencies (npm or yarn)
 
