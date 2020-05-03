@@ -49,8 +49,8 @@ Build the docker images
 
 Initalize the tables
 
-`docker-compose run backend python3 manage.py makemigrations Recycler`
-`docker-compose run backend python3 manage.py mirgate`
+`docker-compose run backend python3 manage.py makemigrations Recycler`  
+`docker-compose run backend python3 manage.py mirgate`  
 
 You will need to create a superuser. Open up another terminal and run the createsuperuser command on the backend container
 
