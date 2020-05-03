@@ -54,9 +54,10 @@ def github_repo_search():
     time_threshold = datetime.now() - timedelta(seconds=60)
     queryset = models.Query.objects.filter(last_searched=None)
     if queryset.count() == 0:
-        queryset = models.Query.objects.filter(last_searched__lt=time_threshold)
+        queryset = models.Query.objects.all().order_by('last_searched')
     if queryset.count() > 0:
         query = queryset[0]
+        logger.debug("[INFO] github_repo_search(): Searching for {0}".format(query.string))
         query_string = query.string
         lang_string = query.language
         if lang_string:
@@ -65,12 +66,13 @@ def github_repo_search():
             search_param = "?q={0}&sort=updated&per_page=100".format(query_string)
         r = requests.get(github_search_url + search_param)
         if r.status_code == requests.codes.ok:
-            utc = pytz.utc
-            last_searched = datetime.now(tz=utc)
-            query.last_search = last_searched
+            query.last_searched = datetime.now(tz=pytz.utc)
+            query.save()
+            print(query)
             logger.info("Found {0} Repos". format(len(r.json()['items'])))
             for idx, i in enumerate(r.json()['items']):
                 if models.Repo.objects.filter(node=i['node_id']).exists():
+                    logger.debug("[INFO] github_repo_search(): Repo already exists, skipping...")
                     continue
                 try:
                     utc = pytz.utc
@@ -94,7 +96,6 @@ def is_repo_public():
     Test if the repo still is public or inaccessible, save the result.
     """
     try:
-        time_threshold = datetime.now(tz=pytz.utc) - timedelta(seconds=144000)
         queryset = models.Repo.objects.filter(last_checked=None)
         if queryset.count() == 0:
             queryset = models.Repo.objects.all().order_by('last_checked')
@@ -122,7 +123,7 @@ def is_repo_public():
         else:
             logger.info("[INFO] Failed to find repo to test...")
     except Exception as e:
-        logger.error("[ERROR] Failed to check public repo: {0} | {1}".format(repo.url, e))
+        logger.error("[ERROR] Failed to check public repo: {0}".format(e))
 
 @periodic_task(run_every=300, name="check_stale_repos_every_5_minute", ignore_result=True)
 def is_repo_stale():

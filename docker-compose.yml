@@ -1,0 +1,58 @@
+version: "3.2"
+services:
+  
+  gitrecycle-redis:
+    image: redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build: ./GitRecycle
+    volumes:
+      - ./GitRecycle:/app/backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./GitRecycle/.env_file
+    stdin_open: true
+    tty: true
+    command: python3 manage.py runserver 0.0.0.0:8000
+
+  frontend:
+    build: ./gitrecycle-frontend
+    volumes:
+      - ./gitrecycle-frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./gitrecycle-frontend/.env_file
+    depends_on:
+      - backend
+    tty: true
+    command: npm start
+
+  celery:
+    build: ./GitRecycle
+    command: celery -A GitRecycle worker -l info
+    volumes:
+      - ./GitRecycle:/app/backend
+      - ./Archive:/app/archive
+    env_file:
+      - ./GitRecycle/.env_file
+    depends_on:
+      - backend
+      - gitrecycle-redis
+    tty: true
+
+  celery-beat:
+    build: ./GitRecycle
+    command: celery -A GitRecycle beat -l info
+    volumes:
+      - ./GitRecycle:/app/backend
+    env_file:
+      - ./GitRecycle/.env_file
+    depends_on:
+      - backend
+      - gitrecycle-redis
+    tty: true
