@@ -122,3 +122,5 @@ GitHub.sublime-settings
 
 #Beat schedule
 celerybeat-schedule
+
+Archive/*

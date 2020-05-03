@@ -37,6 +37,7 @@ services:
     command: celery -A GitRecycle worker -l info
     volumes:
       - ./GitRecycle:/app/backend
+      - ./Archive:/app/archive
     env_file:
       - ./GitRecycle/.env_file
     depends_on:
