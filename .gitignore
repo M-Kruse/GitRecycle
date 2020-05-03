@@ -125,4 +125,4 @@ celerybeat-schedule
 
 Archive/*
 
-celerybeat.pid
+*celerybeat.pid
