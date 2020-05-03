@@ -4,15 +4,16 @@ import { Button } from "reactstrap";
 import { Badge } from "reactstrap";
 import { Header } from "reactstrap";
 import BootstrapTable from 'react-bootstrap-table-next';
-
+import { Container } from "reactstrap";
 import axios from "axios";
 
 import { API_URL_BASE } from "../constants";
 
-const endpoint_repos = `${API_URL_BASE}/api/repo/`
-const endpoint_repos_missing = `${API_URL_BASE}/api/repo/missing/`
-
+const endpoint_repos = `${API_URL_BASE}/api/repo/`;
+const endpoint_repos_missing = `${API_URL_BASE}/api/repo/missing/`;
 const token = process.env.REACT_APP_GITRECYCLE_AUTH_TOKEN;
+const repo_stor_path = process.env.REACT_APP_REPO_STORAGE_PATH;
+console.log(process.env);
 
 class RepoList extends Component {
   state = {
@@ -42,12 +43,14 @@ class RepoList extends Component {
     const repos = this.state.repos;
     
     return (
+
       <Table size="sm">
         <thead>
           <tr>
             <th>URL</th>
             <th>Create Date</th>
             <th>Last Checked</th>
+            <th>Archive Directory</th>
             <th>Archived</th>
             <th>Missing</th>
             <th></th>
@@ -66,9 +69,9 @@ class RepoList extends Component {
                 <td>{repo.url}</td>
                 <td>{repo.create_date}</td>
                 <td>{repo.last_checked}</td>
+                <td>{repo.archive_loc.replace(repo_stor_path, "")}</td>
                 <td><Badge href="#" color={repo.archived ? 'success' : 'warning'}> {String(repo.archived)} </Badge> </td>
                 <td><Badge href="#" color={repo.missing ? 'success' : 'warning'}> {String(repo.missing)} </Badge> </td>
-                <td><Button color="primary" size="sm">Detail</Button>{' '}</td>
                 <td></td>
 
               </tr>
@@ -76,6 +79,7 @@ class RepoList extends Component {
           )}
         </tbody>
       </Table>
+    
     );
   }
 }

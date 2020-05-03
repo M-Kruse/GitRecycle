@@ -4,6 +4,7 @@ import { Button } from "reactstrap";
 import { Badge } from "reactstrap";
 import { Header } from "reactstrap";
 import BootstrapTable from 'react-bootstrap-table-next';
+import { Col, Container, Row } from "reactstrap";
 
 import axios from "axios";
 
@@ -35,10 +36,13 @@ class QueryList extends Component {
     const queries = this.state.queries;
     
     return (
+    <Container style={{ marginTop: "20px" }}>
       <Table size="sm">
         <thead>
           <tr>
+
             <th>String</th>
+            <th>Last Searched</th>
             <th>Language</th>
             <th>Time Limit</th>
           </tr>
@@ -54,6 +58,7 @@ class QueryList extends Component {
             queries.results.map(query => (
               <tr key={query.pk}>
                 <td>{query.string}</td>
+                <td>{query.last_searched}</td>
                 <td>{query.language  ? query.language : 'Any'}</td>
                 <td>{query.time_limit ? query.time_limit : 'None'}</td>
               </tr>
@@ -61,6 +66,7 @@ class QueryList extends Component {
           )}
         </tbody>
       </Table>
+      </Container>
     );
   }
 }
