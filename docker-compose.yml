@@ -16,8 +16,7 @@ services:
       - ./GitRecycle/.env_file
     stdin_open: true
     tty: true
-    command: python3 manage.py makemigrations Recycler
-    command: python3 manage.py migrate
+    entrypoint: /entrypoint.sh
     command: python3 manage.py runserver 0.0.0.0:8000
 
   frontend:

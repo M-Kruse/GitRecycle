@@ -14,5 +14,5 @@ COPY . /app/backend
 # Make port 8000 available for the app
 EXPOSE 8000
 
-CMD python3 manage.py makemigrations Recycler
-CMD python3 manage.py migrate
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
