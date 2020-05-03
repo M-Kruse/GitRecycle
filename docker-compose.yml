@@ -16,6 +16,8 @@ services:
       - ./GitRecycle/.env_file
     stdin_open: true
     tty: true
+    command: python3 manage.py makemigrations Recycler
+    command: python3 manage.py migrate
     command: python3 manage.py runserver 0.0.0.0:8000
 
   frontend:
@@ -41,6 +43,7 @@ services:
     env_file:
       - ./GitRecycle/.env_file
     depends_on:
+      - backend
       - gitrecycle-redis
     tty: true
 
@@ -52,5 +55,6 @@ services:
     env_file:
       - ./GitRecycle/.env_file
     depends_on:
+      - backend
       - gitrecycle-redis
     tty: true

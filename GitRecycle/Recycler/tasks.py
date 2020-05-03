@@ -123,7 +123,7 @@ def is_repo_public():
         else:
             logger.info("[INFO] Failed to find repo to test...")
     except Exception as e:
-        logger.error("[ERROR] Failed to check public repo: {0} | {1}".format(repo.url, e))
+        logger.error("[ERROR] Failed to check public repo: {0}".format(e))
 
 @periodic_task(run_every=300, name="check_stale_repos_every_5_minute", ignore_result=True)
 def is_repo_stale():
