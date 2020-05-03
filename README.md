@@ -55,26 +55,41 @@ Here are the two files that you need to create and their contents, respectively.
 
 `REACT_APP_GITRECYCLE_AUTH_TOKEN=Your_API_Auth_Token` - This is the auth token that you create in the Django admin panel
 
-Build the images
+Build the docker images
 
 `docker-compose build` 
 
-You will need to create a superuser. Start the backend container and run the createsuperuser command
+Start docker compose
 
-`docker run gitrecycle_backend_1`
-`docker exec -it -u0 gitrecycle_backend_1 python3 manage.py createsuperuser`
+`docker-compose up`
+
+There will be some errors, there are a couple things to do. 
+
+You will need to create a superuser. Open up another terminal and run the createsuperuser command on the backend container
+
+`docker-compose run backend python3 manage.py createsuperuser`
 
 You also need an API Auth token for the frontend. Run the `drf_create_token` command on the backend container. The superuser I created in the previous step is named 'scooty' for this example.
 
-`docker container exec -it -u0 gitrecycle_backend_1 python3 manage.py drf_create_token scooty`
+`docker-compose run backend python3 manage.py drf_create_token scooty`
 
-Now open a browser, go to http://127.0.0.1:8000/admin and log in.
+Take that generated token and create your .env_file in the gitrecycle-frontend folder
+
+`echo "REACT_APP_GITRECYCLE_AUTH_TOKEN=b22047aff73058faf9a728b83cb258660f71c7d4" > gitrecycle_frontend/.env_file`
+
+Set the location to store the repos in your backend .env_file. This docker-compose.yml file maps ./Archive/ to /app/archive/ so the container onyl sees /app/archive/. *If you want to change it, change the mapping in the docker-compose.yml config.*
+
+`echo "REPO_STORAGE_PATH=/app/archive/" > GitRecycle/.env_file`
+
+Bring the containers up with docker-compose
+
+`docker-compose up`
+
+Open a browser, go to http://127.0.0.1:8000/admin and log in.
 
 Find the Query model in the list, click the +New button, add a string to the field and click Save.
 
-Now you can start everything up with docker-compose
-
-`docker-compose up`
+The workers should start to get query data on their next beat schedule and the react UI should be able to get data from the API. You can sanity check it by going to the Queries react page and checking if the Query you added is in the table.
 
 ## Celery Worker
 

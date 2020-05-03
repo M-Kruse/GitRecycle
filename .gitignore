@@ -126,3 +126,5 @@ celerybeat-schedule
 Archive/*
 
 *celerybeat.pid
+
+.env_file
