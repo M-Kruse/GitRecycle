@@ -16,7 +16,6 @@ services:
       - ./GitRecycle/.env_file
     stdin_open: true
     tty: true
-    entrypoint: /entrypoint.sh
     command: python3 manage.py runserver 0.0.0.0:8000
 
   frontend:

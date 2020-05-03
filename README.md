@@ -43,18 +43,6 @@ This is in early development, so everything is configured to defaults for local 
 1. Create an Auth token for the React frontend.
 1. Add the Auth token as a new env variable in the frontend docker container
 
-### Environment Variables
-
-Here are the two files that you need to create and their contents, respectively.
-
-* ./GitRecycle/.env_file
-
-`REPO_STORAGE_PATH=/app/archive/` - This is where repos will be saved to, it is mapped to `./Archive` You can remove it and symlink it or mount storage here.
-
-* ./gitrecycle-frontend/.env_file
-
-`REACT_APP_GITRECYCLE_AUTH_TOKEN=Your_API_Auth_Token` - This is the auth token that you create in the Django admin panel
-
 Build the docker images
 
 `docker-compose build` 
@@ -74,7 +62,7 @@ You also need an API Auth token for the frontend. Run the `drf_create_token` com
 
 Take that generated token and create your .env_file in the gitrecycle-frontend folder
 
-`echo "REACT_APP_GITRECYCLE_AUTH_TOKEN=ba202535e8420be1a38ae2e39041682b2ce7fc4a" > gitrecycle-frontend/.env_file`
+`echo "REACT_APP_GITRECYCLE_AUTH_TOKEN=YOUR_AUTH_TOKEN_GOES_HERE" > gitrecycle-frontend/.env_file`
 
 Set the location to store the repos in your backend .env_file. This docker-compose.yml file maps ./Archive/ to /app/archive/ so the container onyl sees /app/archive/. *If you want to change it, change the mapping in the docker-compose.yml config.*
 
@@ -84,9 +72,9 @@ Bring the containers up with docker-compose
 
 `docker-compose up`
 
-Open a browser, go to http://127.0.0.1:8000/admin and log in.
+Open a browser, go to http://127.0.0.1:8000/admin and log in with your superuser.
 
-Find the Query model in the list, click the +New button, add a string to the field and click Save.
+Find the Query model in the list, click the +Add button, add a string to the field and click Save.
 
 The workers should start to get query data on their next beat schedule and the react UI should be able to get data from the API. You can sanity check it by going to the Queries react page and checking if the Query you added is in the table.
 
