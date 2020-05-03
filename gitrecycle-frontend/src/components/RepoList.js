@@ -12,7 +12,6 @@ import { API_URL_BASE } from "../constants";
 const endpoint_repos = `${API_URL_BASE}/api/repo/`;
 const endpoint_repos_missing = `${API_URL_BASE}/api/repo/missing/`;
 const token = process.env.REACT_APP_GITRECYCLE_AUTH_TOKEN;
-const repo_stor_path = process.env.REACT_APP_REPO_STORAGE_PATH;
 console.log(process.env);
 
 class RepoList extends Component {
@@ -69,7 +68,7 @@ class RepoList extends Component {
                 <td>{repo.url}</td>
                 <td>{repo.create_date}</td>
                 <td>{repo.last_checked}</td>
-                <td>{repo.archive_loc.replace(repo_stor_path, "")}</td>
+                <td>{repo.archive_loc}</td>
                 <td><Badge href="#" color={repo.archived ? 'success' : 'warning'}> {String(repo.archived)} </Badge> </td>
                 <td><Badge href="#" color={repo.missing ? 'success' : 'warning'}> {String(repo.missing)} </Badge> </td>
                 <td></td>

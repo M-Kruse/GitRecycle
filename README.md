@@ -16,12 +16,13 @@ If the time limit expires, and the repo has not gone missing, the repo is consid
 
 # Why?
 
-I once accidentally set a private repo to public and know others that have too. Github also chooses it as the default repo type when creating a new repo. A repo that Github chooses or is forced to take down will appear to go missing the same as if it went private. I recently thought about what data you might find with certain keywords if you started scraping repos and saving/alerting to ones that vanish within a (short) period of time. How much private data is being exposed that shouldn't have been. During initial testing, in the course of a few hours, searching one keyword, I captured 3 projects that went to private or were deleted. Two of those were just college projects, but did not come back as public repos either. The 3rd was an AI researchers project.
+I once accidentally set a private repo to public and know others that have too. Github chooses it as the default repo type when creating a new repo. A repo that Github chooses or is forced to take down will appear to go missing the same as if it went private. I recently thought about what data you might find with certain keywords if you started scraping repos and saving/alerting to ones that vanish within a (short) period of time. How much private data is being exposed that shouldn't have been. See the wiki for some example recycled repos during development testing. 
 
 # Stack
 
-This is in early development, so everything is configured to defaults for development and no auth.
+This is in early development, so everything is configured to defaults for local development.
 
+* Docker
 * Python
 * Redis
 * Celery
@@ -33,99 +34,57 @@ This is in early development, so everything is configured to defaults for develo
 
 ## General steps
 
-1. Start a redis docker instance
-1. Set up the DRF project
-1. Create a superuser 
-1. Export the repo storage path environment variable (I am using a NFS mount)
-1. Start the DRF project
+1. Configure the env variables file
+1. Build with docker-compose
+1. Connect to the backend docker and start bash shell
+1. Create a django superuser
+1. Log in to the Django admin panel
+1. Add Query model data
 1. Create an Auth token for the React frontend.
-1. Create some fixture data in the Query model.
-1. Start the celery worker (doing work and beat scheduling)
-1. Set the Auth Token environment variable
-1. Start the react frontend
+1. Add the Auth token as a new env variable in the frontend docker container
 
-## Environment Variables
+### Environment Variables
 
-* REACT_APP_GITRECYCLE_AUTH_TOKEN - This is the token for the react frontend
-* REPO_STORAGE_PATH - This is the path to where the repos will be saved
+Here are the two files that you need to create and their contents, respectively.
 
-## Docker
+* ./GitRecycle/.env_file
 
-This uses Redis for both the broker and the backend service at the moment. You can use the default docker image for development.
+`REPO_STORAGE_PATH=/app/archive/` - This is where repos will be saved to, it is mapped to `./Archive` You can remove it and symlink it or mount storage here.
 
-`docker pull redis`  
-`docker run --name "GitRecycle-redis" -d -p 6379:6379 redis`  
+* ./gitrecycle-frontend/.env_file
 
-## Virtual Environment
+`REACT_APP_GITRECYCLE_AUTH_TOKEN=Your_API_Auth_Token` - This is the auth token that you create in the Django admin panel
 
-`virtualenv .venv`  
-`source .venv/bin/activate`  
+Build the images
 
-## PIP packages
+`docker-compose build` 
 
-`pip3 install -r requirements.txt`
+You will need to create a superuser. Start the backend container and run the createsuperuser command
 
-## DRF
+`docker run gitrecycle_backend_1`
+`docker exec -it -u0 gitrecycle_backend_1 python3 manage.py createsuperuser`
 
-Export the path for repo storage
+You also need an API Auth token for the frontend. Run the `drf_create_token` command on the backend container. The superuser I created in the previous step is named 'scooty' for this example.
 
-`export REPO_STORAGE_PATH="/var/nfs/path/to/storage/"`
+`docker container exec -it -u0 gitrecycle_backend_1 python3 manage.py drf_create_token scooty`
 
-Enter the project directory
+Now open a browser, go to http://127.0.0.1:8000/admin and log in.
 
-`cd GitRecycle`
+Find the Query model in the list, click the +New button, add a string to the field and click Save.
 
-Make the migrations and create the db
+Now you can start everything up with docker-compose
 
-`python3 manage.py makemigrations Recycler && python3 manage.py migrate`
-
-Create your superuser
-
-`python3 manage.py createsuperuser --username scooty --email scooty@localhost`
-
-Start it like any other django project
-
-`python3 manage.py runserver 127.0.0.1:8000`
-
-Without any Query data, the workers can't search Github for repos and generate work. Go to the admin at http://127.0.0.1/admin/ and log in as the superuser. Go to the Query objects and click the + button to create a new Query object.
-
-You will need an Auth token for the React frontend. You can create one by going to http://127.0.0.1/admin/ clicking on Token and then creating a new token for your user.
+`docker-compose up`
 
 ## Celery Worker
 
 Currently Celery is hooked into the Repo model's post save function to send newly saved github repos to a celery worker queue which uses GitRecycle/tasks.py
 
-### How to start workers
-
-From the root DRF project directory, same as where manage.py lives, run the worker and the beat
-
-`celery -A GitRecycle worker -l debug -B`
-
-Currently the celery worker schedule is like this
-	
-	* New repos are scheduled every minute
-	* Repo visibility is scheduled every 3 seconds
-	* Repos are checked for being stale every 5 minutes
-	* Stale repos are deleted every 15 minutes
-
-The schedule needs to be played with more, tuned to avoid spammming with requests. ***Use at your own risk***
-
 ## React Frontend
 
-There is a simple react frontend to render a list of repos.
+There is a simple react frontend to render a list of repos at http://127.0.0.1:3000
 
 ![image](https://user-images.githubusercontent.com/46699116/80047048-3b7fb080-84c1-11ea-9adc-4390d086c036.png)
-
-Install the dependencies (npm or yarn)
-
-`cd gitrecycle-frontend`  
-`npm install`  
-
-Export the Auth token and start the project
-
-`REACT_APP_GITRECYCLE_AUTH_TOKEN=abc123zyz npm start`
-
-If there are no errors, you can browse to the development server at http://127.0.0.1:3000
 
 # Endpoints
 

@@ -1,0 +1,1 @@
+from rest_framework.authtoken.models import Token\ntoken = Token.objects.create(user=scooty)\nprint(token) manage.py shell
