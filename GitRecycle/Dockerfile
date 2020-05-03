@@ -13,6 +13,3 @@ COPY . /app/backend
 
 # Make port 8000 available for the app
 EXPOSE 8000
-
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
