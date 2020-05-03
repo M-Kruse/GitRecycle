@@ -59,11 +59,10 @@ Build the docker images
 
 `docker-compose build` 
 
-Start docker compose
+Initalize the tables
 
-`docker-compose up`
-
-There will be some errors, there are a couple things to do. 
+`docker-compose run backend python3 manage.py makemigrations Recycler`
+`docker-compose run backend python3 manage.py mirgate`
 
 You will need to create a superuser. Open up another terminal and run the createsuperuser command on the backend container
 
@@ -75,7 +74,7 @@ You also need an API Auth token for the frontend. Run the `drf_create_token` com
 
 Take that generated token and create your .env_file in the gitrecycle-frontend folder
 
-`echo "REACT_APP_GITRECYCLE_AUTH_TOKEN=b22047aff73058faf9a728b83cb258660f71c7d4" > gitrecycle_frontend/.env_file`
+`echo "REACT_APP_GITRECYCLE_AUTH_TOKEN=ba202535e8420be1a38ae2e39041682b2ce7fc4a" > gitrecycle-frontend/.env_file`
 
 Set the location to store the repos in your backend .env_file. This docker-compose.yml file maps ./Archive/ to /app/archive/ so the container onyl sees /app/archive/. *If you want to change it, change the mapping in the docker-compose.yml config.*
 

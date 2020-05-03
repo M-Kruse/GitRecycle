@@ -4,9 +4,9 @@ FROM node:8
 WORKDIR /app/
 
 # Install dependencies
-# COPY package.json yarn.lock /app/
+COPY package.json yarn.lock /app/
 
-# RUN npm install
+RUN npm install
 
 # Add rest of the client code
 COPY . /app/
