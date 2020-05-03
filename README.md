@@ -34,14 +34,14 @@ This is in early development, so everything is configured to defaults for local 
 
 ## General steps
 
-1. Configure the env variables file
 1. Build with docker-compose
-1. Connect to the backend docker and start bash shell
+1. Init the database
 1. Create a django superuser
+1. Create an Auth token for the React frontend.
+1. Create the .env_files for backend and frontend
+1. Bring the containers up with docker-compose
 1. Log in to the Django admin panel
 1. Add Query model data
-1. Create an Auth token for the React frontend.
-1. Add the Auth token as a new env variable in the frontend docker container
 
 Build the docker images
 
