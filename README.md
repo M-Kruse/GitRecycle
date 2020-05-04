@@ -16,7 +16,7 @@ If the time limit expires, and the repo has not gone missing, the repo is consid
 
 # Why?
 
-I once accidentally set a private repo to public and know others that have too. Github chooses it as the default repo type when creating a new repo. A repo that Github chooses or is forced to take down will appear to go missing the same as if it went private. I recently thought about what data you might find with certain keywords if you started scraping repos and saving/alerting to ones that vanish within a (short) period of time. How much private data is being exposed that shouldn't have been. See the wiki for some example recycled repos during development testing. 
+I once accidentally set a private repo to public and know others that have too. Github chooses it as the default repo type when creating a new repo. A repo that Github chooses or is forced to take down will appear to go missing the same as if it went private. I recently thought about what data you might find with certain keywords if you started scraping repos and saving/alerting to ones that vanish within a (short) period of time. How much private data is being exposed that shouldn't have been. See the [wiki](https://github.com/M-Kruse/GitRecycle/wiki/Scratch) for some example recycled repos during development testing. 
 
 # Stack
 
