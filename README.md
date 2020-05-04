@@ -1,6 +1,6 @@
 ![image](https://user-images.githubusercontent.com/46699116/79952710-abddf180-842f-11ea-90ef-425533be91bf.png)
 
-# GitRecycle
+# GitRecycle aka "Git Dumpster Diver"
 
 This is a project to test the idea of creating a recycle bin for public github repos in order to find ones that are either deleted or went from public to private in a timeframe, such as in the case of an accident or forced removal. This is the original idea, it may flux a bit.
 
