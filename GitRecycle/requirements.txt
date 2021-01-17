@@ -1,4 +1,4 @@
-celery
+celery==4.4.7
 gitpython
 redis
 django
